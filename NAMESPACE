@@ -1,0 +1,9 @@
+useDynLib(onlinePCA)
+
+import(rARPACK)
+importFrom(Rcpp, evalCpp)
+importFrom(splines,splineDesign)
+
+export(batchpca, coef2fd, create.basis, fd2coef, incRpca, 
+	perturbationRpca, secularRpca, sgapca, snlpca, 
+	updateCovariance, updateMean)
