@@ -21,11 +21,12 @@ snlpca(d, Q, x, gamma, center, type = c("exact", "nn"))
 \details{
 The argument \code{d} can be omitted if the interest lies in principal components (PC's) only and not eigenvalues. \cr 
 The gain vector \code{gamma} determines the weight placed on the new data in updating each PC. The first coefficient of \code{gamma} corresponds to the first PC, etc.. \code{gamma} can be specified as a single positive number (recycled by the function) or as a vector of length \code{ncol(Q)}. It  For larger values of \code{gamma}, more weight is placed on \code{x} and less on \code{Q}. A common choice is of the form \code{c/n}, with \code{n} the sample size and \code{c} a suitable positive constant. \cr 
-The Subspace Network Learning PCA can be implemented exactly or through a neural network. The latter is less accurate but much faster.}
+The Subspace Network Learning PCA can be implemented exactly or through a neural network. The latter is less accurate but much faster.\cr Missing values in \code{x} are imputed using the BLUP method of Brand (2002).}
 
 \value{A matrix of (rotated) principal components stored in columns.}
 
 \references{
+Brand, M. (2002). Incremental singular value decomposition of uncertain data with missing values. \emph{European Conference on Computer Vision (ECCV).}\cr
 Oja (1992). Principal components, Minor components, and linear neural networks. \emph{Neural Networks.}
 }
 
@@ -67,3 +68,5 @@ batchP <- tcrossprod(batch)
 # Relative distance between the two projectors (Frobenius norm)
 norm(snlP - batchP, "2") / norm(batchP, "2")
 }
+
+\keyword{multivariate}

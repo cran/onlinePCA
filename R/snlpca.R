@@ -10,11 +10,11 @@ snlpca <- function (d, Q, x, gamma, center, type = c("exact", "nn"))
     if (length(na) > 0)
     		{ if (length(na) == length(x))
     			stop("x contains only NAs")
-    			 A <- Q * diag(sqrt(d))
+    			 A <- Q %*% diag(sqrt(d))
  		if (nrow(Q) - length(na) >= q)
-	 		{ x[na] <- A[na,, drop = FALSE] %*% 
- 				lsfit(A[-na,, drop = FALSE], x[-na], 
- 					intercept = FALSE)$coefficients
+	 		{ ginvAx.nona <- suppressWarnings(lsfit(A[-na,, drop = FALSE], 
+	 			x[-na], intercept = FALSE)$coefficients)
+	 			x[na] <- A[na,, drop = FALSE] %*% ginvAx.nona
  			} else {
  			svdA <- svd(A)
  			pos <- svdA$d > sqrt(.Machine$double.eps)

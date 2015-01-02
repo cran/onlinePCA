@@ -1,0 +1,7 @@
+Changes to Version 1.0-1
+
+   - Fixed bug in incRpca, perturbationRpca, secularRpca, sgapca, snlpca related to  missing data.
+
+   - Added references to Brand (2002) in help pages of incRpca, perturbationRpca, secularRpca, sgapca, snlpca. 
+
+   - Added Hervé Cardot as contributor.

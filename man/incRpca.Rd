@@ -77,3 +77,4 @@ plot(error, xlab = "PC index", ylab = "Relative error", log = "y",
 
 }
 
+\keyword{multivariate}

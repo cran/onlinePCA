@@ -11,9 +11,10 @@ Online PCA using perturbation methods (\code{\link{perturbationRpca}, \link{secu
 \tabular{ll}{
 Package: \tab onlinePCA\cr
 Type: \tab Package\cr
-Version: \tab 1.0\cr
+Version: \tab 1.0-1\cr
 Date: \tab 2014-12-10\cr
 License: \tab GPL-3\cr
+URL: \tab \url{http://cran.r-project.org/package=onlinePCA}\cr
 }
 %~~ An overview of how to use the package, including the most important functions ~~
 }
@@ -27,5 +28,5 @@ Hegde et al. (2006) Perturbation-Based Eigenvector Updates for On-Line Principal
 Li, W., Yue, H. H., Valles-Cervantes, S. and Qin, S. J. (2000). Recursive PCA for adaptive process monitoring. \emph{Journal of Process Control}.\cr
 Oja (1992). Principal components, Minor components, and linear neural networks. \emph{Neural Networks.} 
 }
-% \keyword{ package }
+\keyword{ package }
 

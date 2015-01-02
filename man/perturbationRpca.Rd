@@ -20,6 +20,7 @@ This function recursively updates the PCA with respect to a single new data vect
 
 \details{
 The forgetting factor \code{ff} determines the balance between past and present observations in the PCA update: the closer it is to 1 (resp. to 0), the more weight is placed on current (resp. past) observations. At least one of the arguments \code{n} and \code{ff} must be specified. If \code{ff} is specified, its value overrides the argument \code{n}; otherwise, \code{ff} is set to \code{1/n} which corresponds to the assumption of a stationnary observation process. If \code{center} is not specified, then the data \code{x} is not centered prior to PCA. 
+Missing values in \code{x} are imputed using the BLUP method of Brand (2002). 
 }
 
 \value{
@@ -29,8 +30,8 @@ A list with components
 }
 
 \references{
-Hegde et al. (2006) Perturbation-Based Eigenvector Updates for On-Line Principal Components Analysis and Canonical Correlation Analysis. 
-\emph{Journal of VLSI Signal Processing}.}
+Brand, M. (2002). Incremental singular value decomposition of uncertain data with missing values. \emph{European Conference on Computer Vision (ECCV).}\cr
+Hegde et al. (2006) Perturbation-Based Eigenvector Updates for On-Line Principal Components Analysis and Canonical Correlation Analysis. \emph{Journal of VLSI Signal Processing}.}
 
 \note{
 This perturbation method is based on large sample approximations. It may be highly inaccurate for small/medium sized samples and should not be used in this case.}
@@ -71,3 +72,4 @@ plot(error, xlab = "PC index", ylab = "Relative error", log = "y",
 
 }
 
+\keyword{multivariate}
