@@ -1,17 +1,17 @@
 Package: onlinePCA
 Type: Package
 Title: Online Principal Component Analysis
-Version: 1.0-1
-Date: 2015-01-02
+Version: 1.2
+Date: 2015-08-06
 Author: David Degras [aut, cre], Herve Cardot [ctb]
 Maintainer: David Degras <ddegrasv@depaul.edu>
 Description: Online PCA for multivariate and functional data using perturbation, incremental, and stochastic gradient methods. 
 License: GPL-3
-Depends: R (>= 3.0.2)
-Imports: rARPACK, Rcpp (>= 0.11.2), splines
-LinkingTo: Rcpp, RcppArmadillo (>= 0.4.320.0)
+Depends: R (>= 3.0.2), rARPACK
+Imports: Rcpp (>= 0.11.4), splines, stats
+LinkingTo: Rcpp, RcppArmadillo
 URL: http://cran.r-project.org/package=onlinePCA
 Repository: CRAN
-Packaged: 2015-01-20 22:19:26 UTC; David
 NeedsCompilation: yes
-Date/Publication: 2015-01-21 07:27:37
+Packaged: 2015-08-11 23:21:53 UTC; David
+Date/Publication: 2015-08-12 06:42:49

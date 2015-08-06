@@ -1,3 +1,30 @@
+Changes to Version 1.2
+
+   - Added function ccipca implementing the candid-covariance free incremental PCA algorithm of Weng et al. (2003).
+
+   - Added function ghapca implementing the generalized hebbian algorithm of Sanger (1989).
+
+   - Minor modifications to code of function sgapca.
+
+   - Added argument q to functions ghapca, sgapca, and snlpca for specifying number of PC to compute. 
+
+Changes to Version 1.1
+
+   - Added function incRpca.rc for incremental PCA with reduced complexity. 
+
+   - Removed code related to missing data imputation from functions incRpca, perturbationRpca, secularRpca, sgapca, snlpca.
+
+   - Added function impute to handle missing data using BLUP.
+
+   - Minor modifications to code of function incRpca.
+
+  - Removed argument d (eigenvalues) from function snlpca as the related technique was found unsuitable for eigenvalue calculation.   
+
+   - Added reference to Bunch et al. (1978) to secularRpca help page, removed reference to Li et al. (2000)
+
+   - Changed status of package rARPACK from import to dependency.
+ 
+
 Changes to Version 1.0-1
 
    - Fixed bug in incRpca, perturbationRpca, secularRpca, sgapca, snlpca related to  missing data.

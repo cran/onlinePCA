@@ -1,36 +1,37 @@
-sgapca <- function (d, Q, x, gamma, center, type = c("exact","nn")) 
+sgapca <- function (lambda, U, x, gamma, q = length(lambda), center, type = c("exact","nn"), sort = TRUE) 
 {
+	d <- NROW(U)
+	k <- NCOL(U)
+	
+	stopifnot(length(x)==d)
+	if (!missing(lambda))
+		stopifnot(length(lambda)==k)
     if (!missing(center)) 
     	x <- x - center
-    na <- which(is.na(x))
-    if (length(na) > 0)
-    		{ if (length(na) == length(x))
-    			stop("x contains only NAs")
-    			 A <- Q %*% diag(sqrt(d))
- 		if (nrow(Q) - length(na) >= q)
-	 		{ ginvAx.nona <- suppressWarnings(lsfit(A[-na,, drop = FALSE], 
-	 			x[-na], intercept = FALSE)$coefficients)
-	 			x[na] <- A[na,, drop = FALSE] %*% ginvAx.nona
- 			} else {
- 			svdA <- svd(A)
- 			pos <- svdA$d > sqrt(.Machine$double.eps)
- 				if (!any(pos))
-	 				{
-	 				Ainv <- tcrossprod(svdA$v[, pos, drop = FALSE] %*% 
-	 					diag(1/svdA$d[pos]), svdA$u[, pos, drop = FALSE])  
-	 				x[na] <- A[na,, drop = FALSE] %*% Ainv %*% x[-na]
-	 				} else x[na] <- 0
- 				}	
-    		}
-    k <- length(d)
-	if (length(gamma) < k) 
-		gamma <- rep_len(gamma,k)
-	if (!is.matrix(Q))
-		Q <- as.matrix(Q)
-	type <- match.arg(type)
-	result <- switch(type, exact = sgapca_exC(d,Q,x,gamma), 
-		nn = sgapca_nnC(d,Q,x,gamma))
+	if (!is.matrix(U))
+		U <- as.matrix(U)
 
-	ix <- order(result[[1]], decreasing = TRUE)	
-    return(list(values = result[[1]][ix], vectors = result[[2]][,ix]))
+	gamma <- rep_len(gamma,k)
+	y <- as.numeric(crossprod(U,x))
+	type <- match.arg(type)
+	U <- switch(type, exact = sgapca_exC(U,x,y,gamma), 
+		nn = sgapca_nnC(U,x,y,gamma))
+
+    if (!missing(lambda)) {
+        lambda <- (1 - gamma) * lambda + gamma * y * y
+        if (sort) {
+            ix <- order(lambda, decreasing = TRUE)
+            if (!identical(ix, 1:k)) {
+                lambda <- lambda[ix]
+                U <- U[, ix]
+            }
+        }
+		if (q<k) 
+			length(lambda) <- q	
+    } else lambda <- NULL
+
+		if (q<k) 
+			U <- U[,1:q]
+
+    return(list(values = lambda, vectors = U))
 }

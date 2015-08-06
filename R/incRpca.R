@@ -1,43 +1,35 @@
-incRpca <- function (d, Q, x, n, ff = 1/n, k = ncol(Q), center) 
+incRpca <- function (lambda, U, x, n, f = 1/n, q = length(lambda), center, tol = 1e-07) 
 {
-    q <- length(d)
-    if (ncol(Q) != q) 
-        stop("length(d) != ncol(Q)")
-    if (nrow(Q) != length(x)) 
-        stop("length(x) != nrow(Q)")
+    k <- length(lambda)
+	q <- as.integer(q)
+    if (ncol(U) != k) 
+        stop("length(lambda) != ncol(U)")
+    if (nrow(U) != length(x)) 
+        stop("length(x) != nrow(U)")
     if (!missing(center)) 
         x <- x - center
-    	d <- (1 - ff) * d
-    	x <- sqrt(ff * (1 + ff)) * x
-    na <- which(is.na(x))
-    if (length(na) > 0)
-    		{ if (length(na) == length(x))
-    			stop("x contains only NAs")
-    			 A <- Q %*% diag(sqrt(d))
- 		if (nrow(Q) - length(na) >= q)
-	 		{ ginvAx.nona <- suppressWarnings(lsfit(A[-na,, drop = FALSE], x[-na], intercept = FALSE)$coefficients)
-	 			x[na] <- A[na,, drop = FALSE] %*% ginvAx.nona
- 			} else {
- 			svdA <- svd(A)
- 			pos <- svdA$d > sqrt(.Machine$double.eps)
- 				if (!any(pos))
-	 				{
-	 				Ainv <- tcrossprod(svdA$v[, pos, drop = FALSE] %*% diag(1/svdA$d[pos]), svdA$u[, pos, drop = FALSE])  
-	 				x[na] <- A[na,, drop = FALSE] %*% Ainv %*% x[-na]
-	 				} else x[na] <- 0
- 				}	
-    		}
-    xhat <- crossprod(Q, x)
-    xorth <- x - Q %*% xhat
-    xorth_ <- sqrt(sum(xorth^2))
-    M <- matrix(nrow = q + 1L, ncol = q + 1L)
-    M[1:q, 1:q] <- diag(d) + tcrossprod(xhat)
-    M[1:q, q + 1L] <- xorth_ * xhat
-    M[q + 1L, 1:q] <- xorth_ * xhat
-    M[q + 1L, q + 1L] <- xorth_^2
-    eigM <- eigen(M, TRUE)
-    k <- min(k, q + 1L - (xorth_ < sqrt(.Machine$double.eps)))
-    Q <- cbind(Q, xorth/xorth_) %*% eigM$vectors[, 1:k]
-    return(list(values = eigM$values[1:k], vectors = Q))
-}
+    if (missing(tol))
+		tol <- sqrt(.Machine$double.eps)
+		
+   	lambda <- (1-f) * lambda
+   	x <- sqrt(f*(1+f)) * x
+    xhat <- crossprod(U, x)
+    x <- x - U %*% xhat
+    normx <- sqrt(sum(x^2))
+    if (normx >= tol) {
+    	k <- k+1L
+    	lambda[k] <- 0
+    	xhat[k] <- normx
+    	U <- c(U,x/normx)
+    	dim(U) <- c(length(x),k)
+    }
 
+    eig <- eigen(diag(lambda) + tcrossprod(xhat), TRUE)
+
+    if (q<k) {
+    	length(eig$values) <- q	
+    	eig$vectors <- eig$vectors[,1:q]
+    	}
+
+    return(list(values = eig$values, vectors = U %*% eig$vectors))
+}

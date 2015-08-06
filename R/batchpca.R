@@ -1,9 +1,9 @@
-batchpca <- function(C, k)
+batchpca <- function(C, q)
 {
-	if (missing(k))
-		k <- ncol(C)
-	if (k <= ncol(C) / 10) {
-		res <- eigs_sym(C, k) 
+	if (missing(q))
+		q <- ncol(C)
+	if (q <= ncol(C) / 10) {
+		res <- eigs_sym(C, q) 
 	} else res <- eigen(C, TRUE)
-	list(values = res$values[seq_len(k)], vectors = res$vectors[,seq_len(k)])
+	list(values = res$values[seq_len(q)], vectors = res$vectors[,seq_len(q)])
 }

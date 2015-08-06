@@ -3,66 +3,71 @@
 
 \title{Subspace Network Learning PCA}
 
-\description{This function updates the PCA using the Subspace Network Learning algorithm of Oja (1992).}
+\description{Online PCA with the SNL algorithm of Oja (1992).}
 
 \usage{
-snlpca(d, Q, x, gamma, center, type = c("exact", "nn"))
+snlpca(lambda, U, x, gamma, q = length(lambda), center, 
+	type = c("exact", "nn"), sort = TRUE)
 }
 
 \arguments{
-\item{d}{vector of eigenvalues (optional).}  
- \item{Q}{matrix of principal components stored in columns.}
-  \item{x}{vector of new data.}
-   \item{gamma}{vector of gain parameters.}
- \item{center}{vector used to center \code{x} (optional).}
-  \item{type}{string specifying the algorithm implementation: "exact" or "nn" (neural network).}
+\item{lambda}{optional vector of eigenvalues.}
+\item{U}{matrix of eigenvectors (PC) stored in columns.}
+\item{x}{new data vector.}
+\item{gamma}{vector of gain parameters.}
+\item{q}{number of eigenvectors to compute.}
+\item{center}{optional centering vector for \code{x}.}
+\item{type}{algorithm implementation: "exact" or "nn" (neural network).}
+\item{sort}{Should the new eigenpairs be sorted?}
+
 }
 
-\details{
-The argument \code{d} can be omitted if the interest lies in principal components (PC's) only and not eigenvalues. \cr 
-The gain vector \code{gamma} determines the weight placed on the new data in updating each PC. The first coefficient of \code{gamma} corresponds to the first PC, etc.. \code{gamma} can be specified as a single positive number (recycled by the function) or as a vector of length \code{ncol(Q)}. It  For larger values of \code{gamma}, more weight is placed on \code{x} and less on \code{Q}. A common choice is of the form \code{c/n}, with \code{n} the sample size and \code{c} a suitable positive constant. \cr 
-The Subspace Network Learning PCA can be implemented exactly or through a neural network. The latter is less accurate but much faster.\cr Missing values in \code{x} are imputed using the BLUP method of Brand (2002).}
+\details{ 
+The gain vector \code{gamma} determines the weight placed on the new data in updating each PC. For larger values of \code{gamma}, more weight is placed on \code{x} and less on \code{U}. A common choice is of the form \code{c/n}, with \code{n} the sample size and \code{c} a suitable positive constant. Argument \code{gamma} can be specified as a single positive number (recycled by the function) or as a vector of length \code{q=length(x)} whose \eqn{i}th coefficient  corresponds to the \eqn{i}th PC for \eqn{i=1,...,q}. \cr 
+The Subspace Network Learning PCA can be implemented exactly or through a neural network. The latter is less accurate but much faster.\cr
+Unlike the GHA and SGA algorithms, the SNL algorithm does not consistently estimate  principal components. It provides only the linear space spanned by the PCs. \cr
+If \code{sort} is TRUE and \code{lambda} is not missing, the updated eigenpairs are sorted by decreasing eigenvalue. Otherwise, they are not sorted.  
+}
 
-\value{A matrix of (rotated) principal components stored in columns.}
+\value{A list with components  
+\item{values}{updated eigenvalues or NULL.}
+\item{vectors}{updated (rotated) eigenvectors.}
+}
 
 \references{
-Brand, M. (2002). Incremental singular value decomposition of uncertain data with missing values. \emph{European Conference on Computer Vision (ECCV).}\cr
 Oja (1992). Principal components, Minor components, and linear neural networks. \emph{Neural Networks.}
 }
 
 
-\note{
-Unlike the Stochastic Gradient Ascent algorithm which consistently estimates the principal components (i.e., the eigenvectors of the theoretical covariance matrix), the Subspace Network Learning algorithm only provides the linear space spanned by the PCs and not the PCs themselves. 
-}
-
 \seealso{
-\code{\link{sgapca}}
+\code{\link{ghapca}, \link{sgapca}}
 }
 
 \examples{
 ## Initialization
 n <- 1e4  # sample size
 n0 <- 5e3 # initial sample size
-p <- 10   # number of variables
-mat <- matrix(runif(n*p), n, p)
-mat <- mat * rep(sqrt(12 * (1:p)), each = n)
-# The eigenvalues of mat should be close to 1, 2, ..., p
-# and the corresponding eigenvectors should be close to 
-# the canonical basis of R^p
+d <- 10   # number of variables
+q <- d # number of PC to compute
+X <- matrix(runif(n*d), n, d)
+X <- X * rep(sqrt(12 * (1:d)), each = n)
+# The eigenvalues of X are close to 1, 2, ..., d
+# and the corresponding eigenvectors are close to 
+# the canonical basis of R^d
 
 ## SNL PCA
-xbar <- colMeans(mat[1:n0,])
-pca <- batchpca(cov(mat[1:n0,]))
+xbar <- colMeans(X[1:n0,])
+pca <- batchpca(cov(X[1:n0,]))
 for (i in (n0+1):n) {
-  xbar <- updateMean(xbar, mat[i,],  i - 1)
-  pca <- snlpca(pca$values, pca$vectors, mat[i,], 1 / i, xbar)
+  xbar <- updateMean(xbar, X[i,], i-1)
+  pca <- snlpca(pca$values, pca$vectors, X[i,], 1/i, q, xbar)
 }
 pca
 # Corresponding projection matrix
 snlP <- tcrossprod(pca$vectors)
 
 # Compare to batch PCA 
-(batch <- eigen(cov(mat), TRUE)$vectors)
+batch <- eigen(cov(X), TRUE)$vectors
 batchP <- tcrossprod(batch)
 
 # Relative distance between the two projectors (Frobenius norm)

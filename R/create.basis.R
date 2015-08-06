@@ -1,34 +1,36 @@
-create.basis <- function(x, nknot, lambda = 1e-9, degree = 3, nderiv = 2)
+create.basis <- function(x, p, sp = 1e-9, degree = 3, nderiv = 2)
 {
-	p <- length(x)
-	knot <- quantile(x, (1:nknot)/(nknot + 1))
-	delta <- c(rep.int(min(x), degree+1), knot, rep.int(max(x), degree+1))
+ 	d <- length(x)
+	ord <- degree + 1
+	knot <- quantile(x, seq_len(p-ord)/(p-degree))
+	knot <- c(rep_len(min(x),ord), knot, rep_len(max(x),ord))
 
-	# B-spline design matrix
-	B <- splines::splineDesign(delta, x, degree+1)
+	# B-spline matrix
+	B <- splines::splineDesign(knot, x, ord)
 	
-	# Gram matrix of B-splines
-	xdiff <- diff(x, 1)
-	M <- crossprod(sqrt(xdiff)*B[-1,])/2 + crossprod(sqrt(xdiff)*B[-p,])/2
+	# Weights for numerical integration (trapeze method)
+	step <- diff(x)
+	w <- (c(0,step) + c(step,0))/2
+	
+	# Gram matrix of B
+	M <- crossprod(B, w * B)
 	eigM <- eigen(M)
-	P <- eigM$vectors
-	d <- eigM$values
-	sqrtM <- P %*% diag(sqrt(d)) %*% t(P)
-	invsqrtM <- P %*% diag(1/sqrt(d)) %*% t(P)
+	vec <- eigM$vectors
+	val <- eigM$values
+	sqrtM <- vec %*% (t(vec) * sqrt(val))
+	invsqrtM <- vec %*% (t(vec) / sqrt(val))
 	
-	# Gram matrix of B-spline derivatives
-	if (lambda>0)
+	# Penalty matrix
+	if (sp>0)
 	{
-		DB <- splines::splineDesign(delta, x, degree+1, rep.int(nderiv, p))
-		G <- crossprod(sqrt(xdiff)*DB[-1,])/2 + crossprod(sqrt(xdiff)*DB[-p,])/2
+		DB <- splines::splineDesign(knot, x, ord, rep_len(nderiv, d))
+		P <- crossprod(DB, w * DB)
 	}
 	
-	# Matrix that maps raw data to smoothed 
-	# coefficients in B-spline basis
-	A <- if (lambda>0) {
-		crossprod(B) + (p * lambda) * G 
-			} else crossprod(B)
-	S <- sqrtM %*% solve(A, t(B)) 
+	# Matrix that maps functional data to their
+	# (smoothed) coefficients in B-spline basis
+	S <- if (sp>0) {tcrossprod(sqrtM %*% solve(M + sp * P), w * B) 
+			} else {tcrossprod(invsqrtM, w * B)}
 
 	list(B = B, S = S, invsqrtM = invsqrtM) 
 }

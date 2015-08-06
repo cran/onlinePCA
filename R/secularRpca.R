@@ -1,46 +1,27 @@
-secularRpca <- function (d, Q, x, n, ff, center, tol = 1e-10, reortho = FALSE) 
+secularRpca <- function (lambda, U, x, n, f = 1/n, center, tol = 1e-10, reortho = FALSE) 
 {
-    if (missing(ff)) 
-        ff <- 1/n
-    else if (ff <= 0 || ff >= 1) 
-        stop("Argument 'ff' must be in (0,1)")
+	if (f <= 0 || f >= 1) 
+        stop("Argument 'f' must be in (0,1)")
     if (!missing(center)) 
         x <- x - center
-    p <- length(d)
-    if (p != ncol(Q)) 
-        stop("Arguments 'd' and 'Q' of incompatible dimensions")
-    d <- (1 - ff) * d
-    na <- which(is.na(x))
-    if (length(na) > 0)
-    		{ if (length(na) == length(x))
-    			stop("x contains only NAs")
-   			 A <- Q %*% diag(sqrt(d))
- 		if (nrow(Q) - length(na) >= q)
-	 		{ ginvAx.nona <- suppressWarnings(lsfit(A[-na,, drop = FALSE], 
-	 			x[-na], intercept = FALSE)$coefficients)
-	 			x[na] <- A[na,, drop = FALSE] %*% ginvAx.nona
- 			} else {
- 			svdA <- svd(A)
- 			pos <- svdA$d > sqrt(.Machine$double.eps)
- 				if (!any(pos))
-	 				{
-	 				Ainv <- tcrossprod(svdA$v[, pos, drop = FALSE] %*% 
-	 					diag(1/svdA$d[pos]), svdA$u[, pos, drop = FALSE])  
-	 				x[na] <- A[na,, drop = FALSE] %*% Ainv %*% x[-na]
-	 				} else x[na] <- 0
- 				}	
-    		}
-    z <- sqrt((1 + ff) * ff) * crossprod(Q, x)
-    ix <- order(d)
-    Q <- Q[, ix]
-    d <- d[ix]
+    q <- length(lambda)
+    if (q != ncol(U)) 
+        stop("Arguments 'lambda' and 'U' of incompatible dimensions")
+
+    lambda <- (1-f) * lambda
+    z <- sqrt((1+f)*f) * crossprod(U,x)
+    ix <- order(lambda)
+    U <- U[,ix]
+    lambda <- lambda[ix]
     z <- z[ix]
+
+	# Initial deflation
     eps <- max(tol, .Machine$double.eps)
-    active <- seq_len(p)
+    active <- seq_len(q)
     zzero <- which(abs(z) < eps)
     if (length(zzero)) 
         active <- setdiff(active, zzero)
-    ind <- which(diff(d[active]) < eps)
+    ind <- which(diff(lambda[active]) < eps)
     if (length(ind)) {
         ind <- sort(unique(c(ind, ind + 1L)))
         ix <- which(diff(ind) > 1)
@@ -51,24 +32,26 @@ secularRpca <- function (d, Q, x, n, ff, center, tol = 1e-10, reortho = FALSE)
         for (i in 1:ngroup) {
             g <- group[[i]]
             mult <- length(g)
-            Q1 <- Q[, g]
+            U1 <- U[, g]
             z1 <- z[g]
             sigma <- sqrt(sum(z1^2))
             a <- c(sigma + z1[1], z1[-1])
             a <- a/sqrt(sum(a^2))
             H <- diag(mult) - 2 * tcrossprod(a)
-            Q[, g] <-Q1 %*% H
+            U[, g] <-U1 %*% H
             z[g] <- c(-sigma, rep(0, mult - 1))
             active <- setdiff(active, g[-1])
        }
-       rm(g, Q1, z1, sigma, a, H)
+       rm(g, U1, z1, sigma, a, H)
     }
+    
+    # Resolution of secular equations
     pact <- length(active)
-    dact <- d[active]
+    dact <- lambda[active]
     z2act <- z[active]^2
     bounds <- c(dact, dact[pact] + sum(z2act))
     amp <- diff(bounds)
-    f <- function(lambda) sum(z2act/{
+    secular <- function(lambda) sum(z2act/{
         dact - lambda
     }) + 1
     solver <- function(i) {
@@ -76,11 +59,11 @@ secularRpca <- function (d, Q, x, n, ff, center, tol = 1e-10, reortho = FALSE)
         repeat {
             lb <- bounds[i] + delta
             ub <- bounds[i + 1] - delta
-            flb <- f(lb)
-            fub <- f(ub)
+            flb <- secular(lb)
+            fub <- secular(ub)
             test <- flb * fub
             if (test < 0) {
-                return(uniroot(f, c(lb, ub), f.lower = flb, f.upper = fub, 
+                return(uniroot(secular, c(lb, ub), f.lower = flb, f.upper = fub, 
                   tol = tol)$root)
             }
             else if (test == 0) {
@@ -96,7 +79,9 @@ secularRpca <- function (d, Q, x, n, ff, center, tol = 1e-10, reortho = FALSE)
         }
     }
     roots <- sapply(seq_len(pact), solver)
-    d[active] <- roots
+    lambda[active] <- roots
+    
+    # Computation of eigenvectors
     if (reortho) {
         num <- matrix(roots - rep(dact, each = pact), pact, pact)
         den <- matrix(dact - rep(dact, each = pact), pact, pact)
@@ -113,6 +98,6 @@ secularRpca <- function (d, Q, x, n, ff, center, tol = 1e-10, reortho = FALSE)
         norms <- sqrt(.colSums(eigvecs^2, pact, pact))
         eigvecs <- eigvecs/rep(norms, each = pact)
     }
-    Q[, active] <- Q[, active] %*% eigvecs
-    return(list(values = d[p:1], vectors = Q[, p:1]))
+    U[, active] <- U[, active] %*% eigvecs
+    return(list(values = lambda[q:1], vectors = U[, q:1]))
 }

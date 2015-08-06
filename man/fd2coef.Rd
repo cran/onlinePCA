@@ -10,16 +10,13 @@ This function computes the coefficients of functional data in a B-spline basis.
 }
 
 \usage{
-fd2coef(fd, basis, byrow = TRUE)
+fd2coef(x, basis, byrow = TRUE)
 }
 
 \arguments{
-  \item{fd}{matrix of functional data.
-}
-  \item{basis}{
-object created by \code{\link{create.basis}}}.
-  \item{byrow}{
-are the functional data stored in rows (TRUE) or in columns (FALSE)?}
+  \item{x}{matrix of functional data.}
+  \item{basis}{object created by \code{\link{create.basis}}}.
+  \item{byrow}{are the functional data stored in rows (TRUE) or in columns (FALSE)?}
 }
 
 \value{
@@ -35,33 +32,33 @@ with \code{M} the Gram matrix associated to the B-spline matrix.}
 }
 
 \examples{
-n <- 100	# number of curves
-p <- 500	# number of observation points
-x <- (1:p)/p	# observation grid
-nknot <- 50  # number of interior knots 
+n <- 100 # number of curves
+d <- 500 # number of observation points
+x <- (1:d)/d # observation points
+p <- 50 # number of B-spline basis functions 
 par(mfrow=c(1,2))
 
 # Simulate Brownian motion
-brownian <- rnorm(n*p)/sqrt(p)
-dim(brownian) <- c(n,p)
+brownian <- rnorm(n*d)/sqrt(d)
+dim(brownian) <- c(n,d)
 brownian <- t(apply(brownian,1,cumsum))
 matplot(x, t(brownian), type="l", ylab="y",
 	main="Sample paths of Brownian motion")
 
 # Create B-spline basis 
-mybasis <- create.basis(x, nknot, 1e-4)
+mybasis <- create.basis(x, p, 1e-4)
 
 # Compute smooth basis coefficients 
-theta <- fd2coef(brownian, mybasis)
+beta <- fd2coef(brownian, mybasis)
 
 # Recover smooth functional data
-brownian.smooth <- coef2fd(theta, mybasis) 
+brownian.smooth <- coef2fd(beta, mybasis) 
 matplot(x, t(brownian.smooth), type = "l", ylab = "y",
 	main = "Smoothed sample paths")
 	
 # Standard PCA and Functional PCA
 pca <- prcomp(brownian)
-fpca <- prcomp(theta)
+fpca <- prcomp(beta)
 matplot(x, pca$rotation[,1:5], type = "l", ylab = "y", 
 	main = "Standard PCA")
 matplot(x, coef2fd(fpca$rotation[,1:5], mybasis, FALSE), 

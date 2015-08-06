@@ -3,36 +3,38 @@
 
 \title{Stochastic Gradient Ascent PCA}
 
-\description{This function updates the PCA using the Stochastic Gradient Ascent algorithm of Oja (1992).}
+\description{Online PCA with the SGA algorithm of Oja (1992).}
 
 \usage{
-sgapca(d, Q, x, gamma, center, type = c("exact", "nn"))
+sgapca(lambda, U, x, gamma, q = length(lambda), center, 
+	type = c("exact", "nn"), sort = TRUE)
 }
 
 \arguments{
-\item{d}{vector of eigenvalues (optional).}  
- \item{Q}{matrix of principal components stored in columns.}
-  \item{x}{new data vector.}
-   \item{gamma}{vector of gain parameters.}
- \item{center}{centering vector for \code{x} (optional).}
-  \item{type}{string specifying the type of implementation: "exact" or "nn" (neural network).}
+\item{lambda}{optional vector of eigenvalues.}  
+\item{U}{matrix of eigenvectors (PC) stored in columns.}
+\item{x}{new data vector.}
+\item{gamma}{vector of gain parameters.}
+\item{q}{number of eigenvectors to compute.}
+\item{center}{optional centering vector for \code{x}.}
+\item{type}{algorithm implementation: "exact" or "nn" (neural network).}
+\item{sort}{Should the new eigenpairs be sorted?}
+
 }
 
 \details{
-The argument \code{d} can be omitted if the interest lies in principal components only and not  eigenvalues. Otherwise, the length of \code{d} and number of columns of \code{Q} must match.\cr 
-The gain vector \code{gamma} determines the weight placed on the new data in updating each principal component. The first coefficient of \code{gamma} corresponds to the first principal component, etc.. It can be specified as a single positive number (which is recycled by the function) or as a vector of length \code{ncol(Q)}. For larger values of \code{gamma}, more weight is placed on \code{x} and less on \code{Q}. A common choice for (the components of) \code{gamma} is of the form \code{c/n}, with \code{n} the sample size and \code{c} a suitable positive constant. \cr 
-The Stochastic Gradient Ascent PCA can be implemented exactly or through a neural network. The latter is less accurate but faster.\cr Missing values in \code{x} are imputed using the BLUP method of Brand (2002). 
-
+The gain vector \code{gamma} determines the weight placed on the new data in updating each principal component. The first coefficient of \code{gamma} corresponds to the first principal component, etc.. It can be specified as a single positive number (which is recycled by the function) or as a vector of length \code{ncol(U)}. For larger values of \code{gamma}, more weight is placed on \code{x} and less on \code{U}. A common choice for (the components of) \code{gamma} is of the form \code{c/n}, with \code{n} the sample size and \code{c} a suitable positive constant. \cr 
+The Stochastic Gradient Ascent PCA can be implemented exactly or through a neural network. The latter is less accurate but faster.\cr
+If \code{sort} is TRUE and \code{lambda} is not missing, the updated eigenpairs are sorted by decreasing eigenvalue. Otherwise, they are not sorted.  
 }
 
 \value{
 A list with components  
-\item{values}{updated eigenvalues in decreasing order.}
+\item{values}{updated eigenvalues or NULL.}
 \item{vectors}{updated principal components.}
 }
 
 \references{
-Brand, M. (2002). Incremental singular value decomposition of uncertain data with missing values. \emph{European Conference on Computer Vision (ECCV).}\cr
 Oja (1992). Principal components, Minor components, and linear neural networks. \emph{Neural Networks.}
 }
 
@@ -43,6 +45,7 @@ Oja (1992). Principal components, Minor components, and linear neural networks. 
 %% ~Make other sections like Warning with \section{Warning }{....} ~
 
 \seealso{
+\code{\link{ghapca}}, 
 \code{\link{snlpca}}
 }
 
@@ -50,24 +53,25 @@ Oja (1992). Principal components, Minor components, and linear neural networks. 
 ## Initialization
 n <- 1e4  # sample size
 n0 <- 5e3 # initial sample size
-p <- 10   # number of variables
-mat <- matrix(runif(n*p), n, p)
-mat <- mat * rep(sqrt(12 * (1:p)), each = n)
-# The eigenvalues of mat should be close to 1, 2, ..., p
-# and the corresponding eigenvectors should be close to 
-# the canonical basis of R^p
+d <- 10   # number of variables
+q <- d # number of PC to compute
+X <- matrix(runif(n*d), n, d)
+X <- X * rep(sqrt(12 * (1:d)), each = n)
+# The eigenvalues of X are close to 1, 2, ..., d
+# and the corresponding eigenvectors are close to 
+# the canonical basis of R^d
 
 ## SGA PCA
-xbar <- colMeans(mat[1:n0,])
-pca <- batchpca(cov(mat[1:n0,]))
+xbar <- colMeans(X[1:n0,])
+pca <- batchpca(cov(X[1:n0,]))
 for (i in (n0+1):n) {
-  xbar <- updateMean(xbar, mat[i,],  i - 1)
-  pca <- sgapca(pca$values, pca$vectors, mat[i,], 2 / i, xbar)
+  xbar <- updateMean(xbar, X[i,], i-1)
+  pca <- sgapca(pca$values, pca$vectors, X[i,], 2/i, q, xbar)
 }
 pca
 
 # Compare to batch PCA 
-eigen(cov(mat), TRUE)
+eigen(cov(X), TRUE)
 }
 
 \keyword{multivariate}

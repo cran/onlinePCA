@@ -7,26 +7,27 @@ Recursive PCA using a rank 1 perturbation method}
 \description{
 This function recursively updates the PCA with respect to a single new data vector, using the (fast) perturbation method of Hegde et al. (2006).}
 
-\usage{perturbationRpca(d, Q, x, n, ff, center)}
+\usage{perturbationRpca(lambda, U, x, n, f = 1/n, center, sort = TRUE)}
 
 \arguments{
-  \item{d}{vector of eigenvalues}
-  \item{Q}{matrix of principal components (eigenvectors of the covariance matrix) stored in columns}
-  \item{x}{new data vector}
-  \item{n}{current sample size (prior to observation of new data)}
-  \item{ff}{forgetting factor: a number between 0 and 1, set to \code{1/n} by default}
-\item{center}{centering vector (optional)}
+  \item{lambda}{vector of eigenvalues.}
+  \item{U}{matrix of eigenvectors (PC) stored in columns.}
+  \item{x}{new data vector.}
+  \item{n}{sample size before observing \code{x}.}
+  \item{f}{forgetting factor: a number between 0 and 1.}
+\item{center}{optional centering vector for \code{x}.}
+\item{sort}{Should the eigenpairs be sorted?}
 }
 
 \details{
-The forgetting factor \code{ff} determines the balance between past and present observations in the PCA update: the closer it is to 1 (resp. to 0), the more weight is placed on current (resp. past) observations. At least one of the arguments \code{n} and \code{ff} must be specified. If \code{ff} is specified, its value overrides the argument \code{n}; otherwise, \code{ff} is set to \code{1/n} which corresponds to the assumption of a stationnary observation process. If \code{center} is not specified, then the data \code{x} is not centered prior to PCA. 
-Missing values in \code{x} are imputed using the BLUP method of Brand (2002). 
+The forgetting factor \code{f} determines the balance between past and present observations in the PCA update: the closer it is to 1 (resp. to 0), the more weight is placed on current (resp. past) observations. At least one of the arguments \code{n} and \code{f} must be specified. If \code{f} is specified, its value overrides the argument \code{n}; otherwise, \code{f} is set to \code{1/n} which corresponds to a stationnary data-generating process. Missing values in \code{x} are imputed using the BLUP method of Brand (2002). \cr
+If \code{sort} is TRUE and \code{lambda} is not missing, the updated eigenpairs are sorted by decreasing eigenvalue. Otherwise, they are not sorted.  
 }
 
 \value{
 A list with components 
-  \item{values}{the updated eigenvalues.}
-  \item{vectors}{the updated eigenvectors.}
+  \item{values}{updated eigenvalues.}
+  \item{vectors}{updated eigenvectors.}
 }
 
 \references{
@@ -43,12 +44,12 @@ This perturbation method is based on large sample approximations. It may be high
 \examples{
 N <- 1e4
 n0 <- 5e3
-p <- 10
-X <- matrix(runif(N*p), N, p)
-X <- X * rep(sqrt(12 * (1:p)), each = N)
-# The eigenvalues of cov(X) are approximately equal to 1, 2, ..., p
+d <- 10
+X <- matrix(runif(N*d), N, d)
+X <- X * rep(sqrt(12 * (1:d)), each = N)
+# The eigenvalues of cov(X) are approximately equal to 1, 2, ..., d
 # and the corresponding eigenvectors are approximately equal to 
-# the canonical basis of R^p
+# the canonical basis of R^d
 
 ## Perturbation-based recursive PCA
 xbar <- colMeans(X[1:n0,])

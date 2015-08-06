@@ -2,34 +2,31 @@
 \alias{updateMean}
 
 \title{
-Recursive update of the sample mean vector
+Update the Sample Mean Vector
 }
 
 \description{
-This functions updates the sample mean vector with respect to new data.
+Recursive update of the sample mean vector.
 }
 
 \usage{
-updateMean(xbar, x, n, ff, byrow = TRUE)
+updateMean(xbar, x, n, f, byrow = TRUE)
 }
 
 \arguments{
-  \item{xbar}{sample mean vector.}
-  \item{x}{new data.}
-  \item{n}{sample size prior to the observation of new data.}
-  \item{ff}{
-forgetting factor: a number between 0 and 1, set to \code{1/n} by default.}
-\item{byrow}{
-logical; should be set to TRUE if the new data vectors are in rows (i.e., variables in columns) and FALSE otherwise.}
+  \item{xbar}{current mean vector.}
+  \item{x}{vector or matrix of new data.}
+  \item{n}{sample size before observing \code{x}.}
+  \item{f}{forgetting factor: a number in (0,1).}
+  \item{byrow}{Are the observation vectors in \code{x} stored in rows?}
 }
 
 \details{
-The forgetting factor \code{ff} determines the balance between past and present observations in the PCA update: the closer it is to 1 (resp. to 0), the more weight is placed on current (resp. past) observations. At least one of the arguments \code{n} and \code{ff} must be specified. If \code{ff} is specified, its value overrides the argument \code{n}; otherwise, \code{ff} is set to \code{1/n} which corresponds to the assumption of a stationnary observation process.\cr
-If unspecified, the argument \code{byrow} defaults to TRUE if \code{x} is a matrix and to FALSE if \code{x} is a vector.
-}
+The forgetting factor \code{f} determines the balance between past and present observations in the PCA update: the closer it is to 1 (resp. to 0), the more weight is placed on current (resp. past) observations. At least one of the arguments \code{n} and \code{f} must be specified. If \code{f} is specified, its value overrides the argument \code{n}. For a given argument \code{n}, the default value of\code{f} is\eqn{k/(n+k)}, with \eqn{k} the number of new vector observations. This corresponds to a stationnary observation process.\cr
+The argument \code{byrow} should be set to TRUE (default value) if the data vectors in \code{x} are stored in rows and to FALSE if they are stored in columns. The function automatically handles the case where \code{x} is a single vector.}
 
 \value{
-The updated sample mean vector. 
+The updated mean vector. 
 }
 
 \seealso{
@@ -39,17 +36,17 @@ The updated sample mean vector.
 \examples{
 n <- 1e4
 n0 <- 5e3
-p <- 10
-mat <- matrix(runif(n*p), n, p)
+d <- 10
+mat <- matrix(runif(n*d), n, d)
 
-## Direct computation of the mean
-xbar <- colMeans(mat)
+## Direct computation
+xbar1 <- colMeans(mat)
 
-## Recursive computation of the covariance
-xbar0 <- colMeans(mat[1:n0,])
-xbarrec <- updateMean(xbar0, mat[(n0+1):n,], n0)
+## Recursive computation
+xbar2 <- colMeans(mat[1:n0,])
+xbar2 <- updateMean(xbar2, mat[(n0+1):n,], n0)
 
 ## Check equality
-all.equal(xbar, xbarrec)
+all.equal(xbar1, xbar2)
 }
 

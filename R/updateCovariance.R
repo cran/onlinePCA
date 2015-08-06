@@ -1,7 +1,7 @@
-updateCovariance <- function (C, x, n, xbar, ff, byrow = TRUE) 
+updateCovariance <- function (C, x, n, xbar, f, byrow = TRUE) 
 {
-	if (missing(n) && missing(ff)) 
-		stop("At least one of the arguments 'n' and 'ff' must be specified")
+	if (missing(n) && missing(f)) 
+		stop("At least one of the arguments 'n' and 'f' must be specified")
 	if (!is.matrix(x)) {
         x <- as.matrix(x)
         byrow <- FALSE
@@ -23,25 +23,25 @@ updateCovariance <- function (C, x, n, xbar, ff, byrow = TRUE)
     meanx <- if (byrow) {
     	.colMeans(x, k, p) 
     	} else .rowMeans(x, p, k)
-	if (missing(ff)) 
-		ff <- 1 / (n + k - 1)	
-    ffm <- 1 / (1 + 1 / ff)
+	if (missing(f)) 
+		f <- 1 / (n + k - 1)	
+    fm <- 1 / (1 + 1 / f)
    
     if (missing(xbar)) {
-    	newxbar = Dxbar = (k * ffm) * meanx 
+    	newxbar = Dxbar = (k * fm) * meanx 
     	} else {
-    	newxbar <- (1 - k * ffm) * xbar + (k * ffm) * meanx 
+    	newxbar <- (1 - k * fm) * xbar + (k * fm) * meanx 
     	Dxbar <- newxbar - xbar
     }
-	a1 <- 1 - k * ff
-	a2 <- 1 - (k - 1) * ff
+	a1 <- 1 - k * f
+	a2 <- 1 - (k - 1) * f
 	x <- x - matrix(newxbar, dimx[1], dimx[2], byrow)
 
     if (k == 1L) 
         return(a1 * C + a2 * tcrossprod(Dxbar))
 	if (byrow)
 		return(a1 * C + a2 * tcrossprod(Dxbar) + 
-			ff * crossprod(x))
+			f * crossprod(x))
 	return(a1 * C + a2 * tcrossprod(Dxbar) + 
-		ff * tcrossprod(x))
+		f * tcrossprod(x))
 }

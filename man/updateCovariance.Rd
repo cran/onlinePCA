@@ -2,30 +2,27 @@
 \alias{updateCovariance}
 
 \title{
-Recursive update of a covariance matrix}
+Update the Sample Covariance Matrix}
 
 \description{
-This function efficiently updates a covariance matrix for new observations without entirely recomputing the covariance.}
+This function recursively updates a covariance matrix without entirely recomputing it when new observations arrive.}
 
 \usage{
-updateCovariance(C, x, n, xbar, ff, byrow = TRUE) 
+updateCovariance(C, x, n, xbar, f, byrow = TRUE) 
 }
 
 \arguments{
   \item{C}{covariance matrix.}
   \item{x}{vector/matrix of new data.}
-  \item{n}{sample size prior to the observation of new data.}
-  \item{xbar}{sample mean (vector) prior to the observation of new data.}
-
-  \item{ff}{forgetting factor: a number beween 0 and 1; set to 1/n by default.}
-  \item{byrow}{
-logical: should be TRUE if the new data vectors are stored in rows (i.e., variables in columns) and FALSE otherwise.}
+  \item{n}{sample size before observing \code{x}.}
+  \item{xbar}{mean vector before observing \code{x}.}
+  \item{f}{forgetting factor: a number beween 0 and 1.}
+  \item{byrow}{Are the observation vectors in \code{x} stored in rows?}
 }
 
 \details{
-The forgetting factor \code{ff} determines the balance between past and present observations in the PCA update: the closer it is to 1 (resp. to 0), the more weight is placed on current (resp. past) observations. At least one of the arguments \code{n} and \code{ff} must be specified. If \code{ff} is specified, its value overrides the argument \code{n}; otherwise, \code{ff} is set to \code{1/n} which corresponds to the assumption of a stationnary observation process.\cr
-If unspecified, the argument \code{byrow} defaults to TRUE if \code{x} is a matrix and to FALSE if \code{x} is a vector.
-}
+The forgetting factor \code{f} determines the balance between past and present observations in the PCA update: the closer it is to 1 (resp. to 0), the more weight is placed on current (resp. past) observations. At least one of the arguments \code{n} and \code{f} must be specified. If \code{f} is specified, its value overrides the argument \code{n}. The default \code{f=1/n} corresponds to a stationnary observation process.\cr
+The argument \code{byrow} should be set to TRUE (default value) if the data vectors in \code{x} are stored in rows and to FALSE if they are stored in columns. The function automatically handles the case where \code{x} is a single vector.}
 
 \value{
 The updated covariance matrix. 
@@ -38,8 +35,8 @@ The updated covariance matrix.
 \examples{
 n <- 1e4
 n0 <- 5e3
-p <- 10
-mat <- matrix(runif(n*p), n, p)
+d <- 10
+mat <- matrix(runif(n*d), n, d)
 
 ## Direct computation of the covariance
 C <- cov(mat)

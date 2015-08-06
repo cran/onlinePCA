@@ -1,47 +1,33 @@
-perturbationRpca <- function (d, Q, x, n, ff, center) 
+perturbationRpca <- function (lambda, U, x, n, f = 1/n, center, sort = TRUE) 
 {
-    if (missing(ff)) 
-        ff <- 1/n else if (ff <= 0 || ff >= 1) 
-			stop("'ff' must be in (0,1)")
-	k <- ncol(Q)
-	p <- length(x) 
-    if (length(d) != k)
-    	stop("'d' and 'Q' of incompatible dimensions")
-    if (nrow(Q) != p)
-    	stop("'Q' and 'x' of incompatible dimensions")
+	stopifnot(f >= 0 & f <= 1) 
+	q <- ncol(U)
+	d <- length(x) 
+    stopifnot(length(lambda) == q)
+    stopifnot(nrow(U) == d)
     if (!missing(center)) 
     	x <- x - center
-    d <- (1 - ff) * d
-    na <- which(is.na(x))
-    if (length(na) > 0)
-    		{ if (length(na) == length(x))
-    			stop("x contains only NAs")
-    			 A <- Q %*% diag(sqrt(d))
- 		if (nrow(Q) - length(na) >= q)
-	 		{ ginvAx.nona <- suppressWarnings(lsfit(A[-na,, drop = FALSE], x[-na], intercept = FALSE)$coefficients)
-	 			x[na] <- A[na,, drop = FALSE] %*% ginvAx.nona
- 			} else {
- 			svdA <- svd(A)
- 			pos <- svdA$d > sqrt(.Machine$double.eps)
- 				if (!any(pos))
-	 				{
-	 				Ainv <- tcrossprod(svdA$v[, pos, drop = FALSE] %*% 
-	 					diag(1/svdA$d[pos]), svdA$u[, pos, drop = FALSE])  
-	 				x[na] <- A[na,, drop = FALSE] %*% Ainv %*% x[-na]
-	 				} else x[na] <- 0
- 				}	
-    		}
-	d2 <- d * d
-    z <- sqrt((1 + ff) * ff) * crossprod(Q, x)
+
+    lambda <- (1-f) * lambda
+    z <- sqrt((1+f)*f) * crossprod(U,x)
     z2 <- z * z
 	num <- tcrossprod(z)  
-	den <- matrix(d + z2, k, k, byrow = TRUE) - 
-		matrix(z2 + d2, k, k)
+	den <- matrix(lambda + z2, q, q, byrow = TRUE) - 
+		matrix(z2 + lambda^2, q, q)
 	V <- num / den
 	diag(V) <- 1
-	Q <- Q %*% V
-    sigma2 <- .colSums(Q * Q, p, k)
-	d <- (d + z2) * sigma2
-    Q <- Q * rep.int(1/sqrt(sigma2), rep.int(p,k))
-   list(values = d, vectors = Q)
+	U <- U %*% V
+    sigma2 <- .colSums(U * U, d, q)
+	lambda <- (lambda + z2) * sigma2
+    U <- U * rep.int(1/sqrt(sigma2), rep.int(d,q))
+    
+    if (sort) {
+    	ind <- order(lambda, decreasing = TRUE)
+        if (!identical(ind, 1:q)) {
+	    	lambda <- lambda[ind]
+    		U <- U[,ind]
+    	}
+	}
+	
+	list(values = lambda, vectors = U)
 }
