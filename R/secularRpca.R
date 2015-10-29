@@ -1,15 +1,30 @@
 secularRpca <- function (lambda, U, x, n, f = 1/n, center, tol = 1e-10, reortho = FALSE) 
 {
-	if (f <= 0 || f >= 1) 
-        stop("Argument 'f' must be in (0,1)")
-    if (!missing(center)) 
-        x <- x - center
-    q <- length(lambda)
-    if (q != ncol(U)) 
-        stop("Arguments 'lambda' and 'U' of incompatible dimensions")
+	# Dimensions check
+    d <- length(lambda)
+	stopifnot(length(x) == d)
+	stopifnot(ncol(U) == d)
+
+	# Argument check
+	stopifnot(f >= 0 && f <= 1) 
+
+	# Centering
+    if (!missing(center)) x <- x - center
+		
+	# Trivial cases
+	if (f == 0) {
+		ind <- order(lambda, decreasing=TRUE)
+		return(list(values=lambda[ind], vectors=U[,ind]))
+	}
+	if (f == 1) {
+		lambda <- c(sum(x^2), rep(0,d-1))
+		U <- cbind(x, matrix(runif(d^2-d),d,d-1))
+		U <- qr.Q(qr(U))
+		return(list(values=lambda, vectors=U))
+	}
 
     lambda <- (1-f) * lambda
-    z <- sqrt((1+f)*f) * crossprod(U,x)
+    z <- sqrt(f) * crossprod(U,x)
     ix <- order(lambda)
     U <- U[,ix]
     lambda <- lambda[ix]
@@ -17,7 +32,7 @@ secularRpca <- function (lambda, U, x, n, f = 1/n, center, tol = 1e-10, reortho 
 
 	# Initial deflation
     eps <- max(tol, .Machine$double.eps)
-    active <- seq_len(q)
+    active <- seq_len(d)
     zzero <- which(abs(z) < eps)
     if (length(zzero)) 
         active <- setdiff(active, zzero)
@@ -99,5 +114,5 @@ secularRpca <- function (lambda, U, x, n, f = 1/n, center, tol = 1e-10, reortho 
         eigvecs <- eigvecs/rep(norms, each = pact)
     }
     U[, active] <- U[, active] %*% eigvecs
-    return(list(values = lambda[q:1], vectors = U[, q:1]))
+    return(list(values = lambda[d:1], vectors = U[, d:1]))
 }

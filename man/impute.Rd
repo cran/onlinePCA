@@ -37,5 +37,3 @@ x.na[c(1,3,7)] <- NA
 x.imputed <- impute(lambda,U,x.na)
 cbind(x,x.imputed)
 }
-
-\keyword{multivariate}

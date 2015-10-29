@@ -10,7 +10,7 @@ incRpca.rc <- function (lambda, Ut, Us, x, n, f = 1/n, center, tol = 1e-7)
 	if (!missing(center))
 		x <- x - center 
 
-	x <- sqrt(f*(1+f)) * x
+	x <- sqrt(f) * x
     lambda <- (1-f) * lambda
     xhat <- crossprod(Us, crossprod(Ut,x))
     x <- x - Ut %*% (Us %*% xhat)

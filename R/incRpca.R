@@ -12,7 +12,7 @@ incRpca <- function (lambda, U, x, n, f = 1/n, q = length(lambda), center, tol =
 		tol <- sqrt(.Machine$double.eps)
 		
    	lambda <- (1-f) * lambda
-   	x <- sqrt(f*(1+f)) * x
+   	x <- sqrt(f) * x
     xhat <- crossprod(U, x)
     x <- x - U %*% xhat
     normx <- sqrt(sum(x^2))

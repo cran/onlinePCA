@@ -9,7 +9,7 @@ perturbationRpca <- function (lambda, U, x, n, f = 1/n, center, sort = TRUE)
     	x <- x - center
 
     lambda <- (1-f) * lambda
-    z <- sqrt((1+f)*f) * crossprod(U,x)
+    z <- sqrt(f) * crossprod(U,x)
     z2 <- z * z
 	num <- tcrossprod(z)  
 	den <- matrix(lambda + z2, q, q, byrow = TRUE) - 

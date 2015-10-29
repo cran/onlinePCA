@@ -1,10 +1,10 @@
 useDynLib(onlinePCA)
 
-importFrom(rARPACK,eigs_sym)
+importFrom(rARPACK, eigs_sym, svds)
 importFrom(Rcpp, evalCpp)
-importFrom(splines,splineDesign)
-importFrom(stats,lsfit,quantile,uniroot)
+importFrom(splines, splineDesign)
+importFrom(stats, lsfit, quantile, runif, rnorm, uniroot)
 
-export(batchpca, ccipca, coef2fd, create.basis, fd2coef, ghapca, impute, incRpca, 
-	incRpca.rc, perturbationRpca, secularRpca, sgapca, snlpca, 
-	updateCovariance, updateMean)
+export(batchpca, bsoipca, ccipca, coef2fd, create.basis, fd2coef, ghapca, impute, 
+	incRpca, incRpca.block, incRpca.rc, perturbationRpca, secularRpca, 
+	sgapca, snlpca, updateCovariance, updateMean)

@@ -36,15 +36,15 @@ The updated covariance matrix.
 n <- 1e4
 n0 <- 5e3
 d <- 10
-mat <- matrix(runif(n*d), n, d)
+x <- matrix(runif(n*d), n, d)
 
 ## Direct computation of the covariance
-C <- cov(mat)
+C <- cov(x)
 
 ## Recursive computation of the covariance
-xbar0 <- colMeans(mat[1:n0,])
-C0 <- cov(mat[1:n0,])
-Crec <- updateCovariance(C0, mat[(n0+1):n,], n0, xbar0)
+xbar0 <- colMeans(x[1:n0,])
+C0 <- cov(x[1:n0,])
+Crec <- updateCovariance(C0, x[(n0+1):n,], n0, xbar0)
 
 ## Check equality
 all.equal(C, Crec)

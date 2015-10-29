@@ -38,62 +38,55 @@ Brand, M. (2002). Incremental singular value decomposition of uncertain data wit
 
 
 \seealso{
-\code{\link{incRpca}}
+\code{\link{incRpca}, \link{incRpca.block}}
 }
 \examples{
-
+\dontrun{
 # Data generation
-n <- 300 # number of units
-d <- 30000 # number of variables
-n0 <- 250 # initial sample
+n <- 400 # number of units
+d <- 10000 # number of variables
+n0 <- 200 # initial sample
 q <- 20 # required number of PCs
-X <- matrix(rnorm(n*d,sd=1/sqrt(d)),n,d) # data matrix
-X <- t(apply(X,1,cumsum)) # standard Brownian motion
+x <- matrix(rnorm(n*d,sd=1/sqrt(d)),n,d) # data matrix
+x <- t(apply(x,1,cumsum)) # standard Brownian motion
 
-# Initial PCA: use duality result to transpose computations
-# from dimension d * d to dimension n0 * n0 
-A = scale(X[1:n0,],scale=FALSE) # center the initial data
-mu0 <- attr(A,"scaled:center")
-eig0 <- eigen(tcrossprod(A) / (n0-1), TRUE) # duality trick
-length(eig0$values) <- q # truncation 
-eig0$vectors <- eig0$vectors[,1:q]
-rescale <- sqrt((n0-1)*eig0$values) # rescaling
-eig0$vectors <- crossprod(A,scale(eig0$vectors, scale = rescale)) # back to dimension d 
+# Initial PCA
+# Initial PCA
+xbar0 <- colMeans(x[1:n0,])
+pca0 <- batchpca(x0c, q, center=xbar0, byrow=TRUE)
 
 # Incremental PCA with rotation
-mu <- mu0
-eig1 <- eig0
+xbar <- xbar0
+pca1 <- pca0
 system.time({
 for (i in n0:(n-1)) {
-	mu <- updateMean(mu, X[i+1,], i)
-	eig1 <- incRpca(eig1$values, eig1$vectors, X[i+1,], i, center = mu)
+	xbar <- updateMean(xbar, x[i+1,], i)
+	pca1 <- incRpca(pca1$values, pca1$vectors, x[i+1,], i, center=xbar)
 	}
 })
 
 # Incremental PCA without rotation
-mu <- mu0
-eig2 <- list(values = eig0$values, Ut = eig0$vectors, Us = diag(q))
+xbar <- xbar0
+pca2 <- list(values=pca0$values, Ut=pca0$vectors, Us=diag(q))
 
 system.time({
 for (i in n0:(n-1)) {
-	mu <- updateMean(mu, X[i+1,], i)
-	eig2 <- incRpca.rc(eig2$values, eig2$Ut, eig2$Us, X[i+1,], i, center = mu)
-	# rotate the PC basis and reduce its size to q every k observations
+	xbar <- updateMean(xbar, x[i+1,], i)
+	pca2 <- incRpca.rc(pca2$values, pca2$Ut, pca2$Us, x[i+1,], 
+		i, center = xbar)
+	# Rotate the PC basis and reduce its size to q every k observations
 	if (i \%\% q == 0 || i == n-1) 
-		{ eig2$values <- eig2$values[1:q]
-		  eig2$Ut <- eig2$Ut \%*\% eig2$Us[,1:q]
-		  eig2$Us <- diag(q)
+		{ pca2$values <- pca2$values[1:q]
+		  pca2$Ut <- pca2$Ut \%*\% pca2$Us[,1:q]
+		  pca2$Us <- diag(q)
 	}
 }
 })
 
-# Comparison
-# relative differences in eigenvalues
-range(eig1$values/eig2$values-1)
-# (absolute) cosines of angles between eigenvectors 
-abs(colSums(eig1$vectors * eig2$Ut))
-
-
+# Check that the results are identical
+# Relative differences in eigenvalues
+range(pca1$values/pca2$values-1)
+# Cosines of angles between eigenvectors 
+abs(colSums(pca1$vectors * pca2$Ut))
 }
-
-\keyword{ multivariate }
+}

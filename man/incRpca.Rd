@@ -24,7 +24,8 @@ incRpca(lambda, U, x, n, f = 1/n, q = length(lambda), center, tol = 1e-7)
 \details{
 If the Euclidean distance between \code{x} and \code{U} is more than \code{tol}, the number of eigenpairs increases to \code{length(lambda)+1} before eventual truncation at order \code{q}. Otherwise, the eigenvectors remain unchanged and only the eigenvalues are updated.
 \cr  
-The forgetting factor \code{f} can be interpreted as the inverse of the number of observation vectors efectively used in the PCA: the "memory" of the PCA algorithm goes back \code{1/f} observations in the past. The default value \code{f=1/n} corresponds to a stationary process (incremental PCA of the empirical covariance matrix). For larger values of \code{f}, the PCA update places more weight on the new observation \code{x} (and less on the current PCA) in the update. For nonstationary processes, \code{f} should be closer to 1.  
+The forgetting factor \code{f} can be interpreted as the inverse of the number of observation vectors effectively used in the PCA: the "memory" of the PCA algorithm goes back \code{1/f} observations in the past. For larger values of \code{f}, the PCA update gives more relative weight to the new data \code{x} and less to the current PCA (\code{lambda,U}). For nonstationary processes, \code{f} should be closer to 1.\cr
+Only one of the arguments \code{n} and \code{f} needs being specified. If it is \code{n}, then \code{f} is set to {1/n} by default (usual PCA of sample covariance matrix where all data points have equal weight). If \code{f} is specified, its value overrides any eventual specification of \code{n}. 
 }
 
 \value{
@@ -42,38 +43,30 @@ Brand, M. (2002). Incremental singular value decomposition of uncertain data wit
 
 
 \examples{
-## Simulation of Brownian motion
-N <- 100	 # number of paths
+## Simulate Brownian motion
+n <- 100 # number of sample paths
 d <- 50	 # number of observation points
 q <- 10	 # number of PCs to compute
-X <- matrix(rnorm(N*d,sd=1/sqrt(d)), N, d)
-X <- t(apply(X,1,cumsum))	
+n0 <- 50 # number of sample paths used for initialization 
+x <- matrix(rnorm(n*d,sd=1/sqrt(d)), n, d)
+x <- t(apply(x,1,cumsum))	
+dim(x) # (100,50)
 
-## Initial PCA
-n0 <- 50
-pca <- eigen(cov(X[1:n0,]))
-xbar <- colMeans(X[1:n0,])
 
-## Incremental PCA
-for (n in n0:(N-1))
+## Incremental PCA (IPCA, centered)
+pca <- prcomp(x[1:n0,]) # initialization
+xbar <- pca$center
+pca <- list(values=pca$sdev[1:q]^2, vectors=pca$rotation[,1:q])
+for (i in (n0+1):n)
 {
-  xbar <- updateMean(xbar, X[n+1,], n)
-  pca <- incRpca(pca$values, pca$vectors, X[n+1,], n, q = q,
+  xbar <- updateMean(xbar, x[i,], i-1)
+  pca <- incRpca(pca$values, pca$vectors, x[i,], i-1, q = q,
 		center = xbar)
 }
 
-## Batch PCA
-pca1 <- eigen(cov(X))
-
-## Error in the approximation of batch PCA (p eigenpairs) 
-## by incremental PCA (q<d eigenpairs) 
-par(mfrow=c(1,2))
-plot(abs(1 - pca$values/pca1$values[1:q]), xlab = "PC index", log = "y",
-	ylab = "Relative error", main = "Eigenvalues", type = "b")
-error <- sqrt(2 * abs(1 - abs(colSums(pca$vectors * pca1$vectors[,1:q] ))))
-plot(error, xlab = "PC index", ylab = "Relative error", log = "y",
-	main = "Eigenvectors", type = "b")
-
+## Incremental PCA (IPCA, uncentered)
+pca <- prcomp(x[1:n0,],center=FALSE) # initialization
+pca <- list(values = pca$sdev[1:q]^2, vectors = pca$rotation[,1:q])
+for (i in (n0+1):n)
+  pca <- incRpca(pca$values, pca$vectors, x[i,], i-1, q = q)
 }
-
-\keyword{multivariate}

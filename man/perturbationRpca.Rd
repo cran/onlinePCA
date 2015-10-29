@@ -20,8 +20,10 @@ This function recursively updates the PCA with respect to a single new data vect
 }
 
 \details{
-The forgetting factor \code{f} determines the balance between past and present observations in the PCA update: the closer it is to 1 (resp. to 0), the more weight is placed on current (resp. past) observations. At least one of the arguments \code{n} and \code{f} must be specified. If \code{f} is specified, its value overrides the argument \code{n}; otherwise, \code{f} is set to \code{1/n} which corresponds to a stationnary data-generating process. Missing values in \code{x} are imputed using the BLUP method of Brand (2002). \cr
-If \code{sort} is TRUE and \code{lambda} is not missing, the updated eigenpairs are sorted by decreasing eigenvalue. Otherwise, they are not sorted.  
+The forgetting factor \code{f} can be interpreted as the inverse of the number of observation vectors effectively used in the PCA: the "memory" of the PCA algorithm goes back \code{1/f} observations in the past. For larger values of \code{f}, the PCA update gives more relative weight to the new data \code{x} and less to the current PCA (\code{lambda,U}). For nonstationary processes, \code{f} should be closer to 1.\cr
+Only one of the arguments \code{n} and \code{f} needs being specified. If it is \code{n}, then \code{f} is set to {1/n} by default (usual PCA of sample covariance matrix where all data points have equal weight). If \code{f} is specified, its value overrides any eventual specification of \code{n}. 
+ \cr
+If \code{sort} is TRUE, the updated eigenpairs are sorted by decreasing eigenvalue. Otherwise, they are not sorted.  
 }
 
 \value{
@@ -31,46 +33,34 @@ A list with components
 }
 
 \references{
-Brand, M. (2002). Incremental singular value decomposition of uncertain data with missing values. \emph{European Conference on Computer Vision (ECCV).}\cr
 Hegde et al. (2006) Perturbation-Based Eigenvector Updates for On-Line Principal Components Analysis and Canonical Correlation Analysis. \emph{Journal of VLSI Signal Processing}.}
 
 \note{
-This perturbation method is based on large sample approximations. It may be highly inaccurate for small/medium sized samples and should not be used in this case.}
+This perturbation method is based on large sample approximations. It tends to be highly inaccurate for small/medium sized samples and should not be used in this case.}
 
 \seealso{
 \code{\link{secularRpca}}
 }
 
 \examples{
-N <- 1e4
-n0 <- 5e3
+n <- 1e3
+n0 <- 5e2
 d <- 10
-X <- matrix(runif(N*d), N, d)
-X <- X * rep(sqrt(12 * (1:d)), each = N)
-# The eigenvalues of cov(X) are approximately equal to 1, 2, ..., d
+x <- matrix(runif(n*d), n, d)
+ x <- x \%*\% diag(sqrt(12*(1:d)))
+# The eigenvalues of cov(x) are approximately equal to 1, 2, ..., d
 # and the corresponding eigenvectors are approximately equal to 
 # the canonical basis of R^d
 
 ## Perturbation-based recursive PCA
-xbar <- colMeans(X[1:n0,])
-pca <- batchpca(cov(X[1:n0,]))
+# Initialization: use factor 1/n0 (princomp) rather 
+# than factor 1/(n0-1) (prcomp) in calculations
+pca <- princomp(x[1:n0,], center=FALSE)
+xbar <- pca$center
+pca <- list(values=pca$sdev^2, vectors=pca$loadings) 
 
-for (n in (n0+1):N) 
-{
-	x <- X[n,]
-	xbar <- updateMean(xbar, x,  n)
-	pca <- perturbationRpca(pca$values, pca$vectors, x, n, center = xbar)
+for (i in (n0+1):n) {
+	xbar <- updateMean(xbar, x[i,], i-1)
+	pca <- perturbationRpca(pca$values, pca$vectors, x[i,], 
+		i-1, center=xbar) }
 }
-
-## Comparison with batch PCA 
-pca1 <- batchpca(cov(X))
-par(mfrow=c(1,2))
-plot(abs(1 - pca$values/pca1$values), xlab = "PC index", log = "y",
-	ylab = "Relative error", main = "Eigenvalues", type = "b")
-error <- sqrt(2 * abs(1 - abs(colSums(pca$vectors * pca1$vectors))))
-plot(error, xlab = "PC index", ylab = "Relative error", log = "y",
-	main = "Eigenvectors", type = "b")
-
-}
-
-\keyword{multivariate}

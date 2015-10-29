@@ -1,28 +1,33 @@
 \name{batchpca}
 \alias{batchpca}
 
-\title{
-Batch PCA of a covariance matrix}
+\title{Batch PCA}
 
 \description{
-This function performs the PCA of a covariance matrix, returning an arbitrary number of principal components (eigenvectors) and corresponding eigenvalues.}
+This function performs the PCA of a data matrix or covariance matrix, returning the specified number of principal components (eigenvectors) and eigenvalues.}
 
 \usage{
-batchpca(C, q)
+batchpca(x, q, center, type = c("data","covariance"), byrow = FALSE)
 }
 
 \arguments{
-  \item{C}{covariance matrix}
-  \item{q}{number of PCs to compute}
+  \item{x}{data or covariance matrix}
+  \item{q}{number of requested PCs}
+  \item{center}{optional centering vector for \code{x}}
+  \item{type}{type of the matrix \code{x}}
+  \item{byrow}{Are observation vectors stored in rows (TRUE) or in columns (FALSE)?}
 }
 
 \details{
-If \code{q} is small (\eqn{k <= ncol(C)/10}), the eigendecomposition is efficiently carried out by the function \code{\link[rARPACK]{eigs_sym}} of package \code{rARPACK} using an Implicitly Restarted Lanczos Method (IRLM). Otherwise the eigendecomposition is performed with the R base function \code{\link[base]{eigen}}.}
+The PCA is efficiently computed using the functions \code{\link[rARPACK]{svds}} or \code{\link[rARPACK]{eigs_sym}} of package \code{rARPACK}, depending on the argument \code{type}. An Implicitly Restarted Arnoldi Method (IRAM) is used in the former case and an Implicitly Restarted Lanczos Method (IRLM) in the latter.\cr
+The arguments \code{center} and \code{byrow} are only in effect if \code{type} is \code{"data"}. In this case a scaling factor \eqn{1/\sqrt{n}} (not \eqn{1/\sqrt{n-1}}) 
+is applied to \code{x} before computing its singular values and vectors, where \eqn{n} is the number of observation vectors stored in \code{x}.    
+}
 
 \value{
 A list with components
-\item{values}{the first \code{q} eigenvalues of \code{C}}
-\item{vectors}{the first \code{q} PC/eigenvectors of \code{C}}
+\item{values}{the first \code{q} squared singular values of \code{x} if \code{type="data"}; the first \code{Q} eigenvalues if \code{type="covariance"}.}
+\item{vectors}{the first \code{q} PC of \code{x}.}
 }
 
 \references{
@@ -30,35 +35,23 @@ A list with components
 }
 
 \examples{
-n <- 1e4
-p <- 500
-q <- 10
 
-X <- matrix(runif(n*p), n, p)
-X <- X * rep(sqrt(12 * (1:p)), each = n)
-C <- cov(X)
-# The eigenvalues of cov(X) should be close to 1, 2, ..., p
-# and the corresponding eigenvectors should be close to 
+\dontrun{
+## Simulate data
+n <- 1e4
+d <- 500
+q <- 10
+x <- matrix(runif(n*d), n, d)
+x <- x \%*\% diag(sqrt(12*(1:d)))
+# The eigenvalues of cov(x) are approximately 1, 2, ..., d
+# and the corresponding eigenvectors are approximately  
 # the canonical basis of R^p
 
-## q first eigenpairs of C using base function eigen
-system.time(replicate(10, {
-  eigenC1 <<- eigen(C, TRUE)
-  eigenC1$values <<- eigenC1$values[1:q]
-  eigenC1$vectors <<- eigenC1$vectors[,1:q]
-  }))
-
-## q first eigenpairs of C using function batchpca
-system.time(replicate(10, eigenC2 <<- batchpca(C, q)))
-
-## Check equality
-all.equal(eigenC1$values, eigenC2$values)
-# Reorient eigenvectors if needed
-for (i in 1:q) 
-{
-  if (sum(eigenC1$vectors[,i] * eigenC2$vectors[,i]) < 0) 
-    eigenC2$vectors[,i] <- - eigenC2$vectors[,i]
+## PCA computation (from fastest to slowest)
+system.time(pca1 <- batchpca(scale(x,scale=FALSE), q, byrow=TRUE))
+system.time(pca2 <- batchpca(cov(x), q, type="covariance"))
+system.time(pca3 <- eigen(cov(x),TRUE))
+system.time(pca4 <- svd(scale(x/sqrt(n-1),scale=FALSE), 0, q))
+system.time(pca5 <- prcomp(x))
 }
-all.equal(eigenC1$vectors, eigenC2$vectors)
 }
-

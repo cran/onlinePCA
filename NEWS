@@ -1,8 +1,22 @@
+Changes to Version 1.3
+
+- Added function bsoipca: Block Stochastic Orthogonal Iteration. A block-wise stochastic variant of the classical power-method. Reference: Mitliagkas et al. (2013). 
+
+- Added function incRpca.block that generalizes the vector update of incRpca to matrix updates. Reference: Levy and Lindenbaum (2000).  
+
+- Minor modification in function incRpca for compatibility of results with incRpca.block.  The covariance update is now C = (1-f) * UDU' + f * xx' where f is the forgetting factor (default 1/n), U the current PC, D the diagonal matrix of eigenvalues, and x the (eventually centered) new data vector. 
+
+- Same modification as above (weights in covariance update) in functions perturbationRpca and secularRpca. 
+
+- Extended function batchpca to perform batch PCA of data matrix by Implicitly Restarted Arnoldi Method (IRAM). Based on function svds of package rARPACK.
+
+ 
+
 Changes to Version 1.2
 
    - Added function ccipca implementing the candid-covariance free incremental PCA algorithm of Weng et al. (2003).
 
-   - Added function ghapca implementing the generalized hebbian algorithm of Sanger (1989).
+   - Added function ghapca implementing the Generalized Hebbian Algorithm of Sanger (1989).
 
    - Minor modifications to code of function sgapca.
 

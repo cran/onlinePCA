@@ -14,7 +14,7 @@ snlpca(lambda, U, x, gamma, q = length(lambda), center,
 \item{lambda}{optional vector of eigenvalues.}
 \item{U}{matrix of eigenvectors (PC) stored in columns.}
 \item{x}{new data vector.}
-\item{gamma}{vector of gain parameters.}
+\item{gamma}{vector of learning rates.}
 \item{q}{number of eigenvectors to compute.}
 \item{center}{optional centering vector for \code{x}.}
 \item{type}{algorithm implementation: "exact" or "nn" (neural network).}
@@ -23,10 +23,10 @@ snlpca(lambda, U, x, gamma, q = length(lambda), center,
 }
 
 \details{ 
-The gain vector \code{gamma} determines the weight placed on the new data in updating each PC. For larger values of \code{gamma}, more weight is placed on \code{x} and less on \code{U}. A common choice is of the form \code{c/n}, with \code{n} the sample size and \code{c} a suitable positive constant. Argument \code{gamma} can be specified as a single positive number (recycled by the function) or as a vector of length \code{q=length(x)} whose \eqn{i}th coefficient  corresponds to the \eqn{i}th PC for \eqn{i=1,...,q}. \cr 
-The Subspace Network Learning PCA can be implemented exactly or through a neural network. The latter is less accurate but much faster.\cr
-Unlike the GHA and SGA algorithms, the SNL algorithm does not consistently estimate  principal components. It provides only the linear space spanned by the PCs. \cr
-If \code{sort} is TRUE and \code{lambda} is not missing, the updated eigenpairs are sorted by decreasing eigenvalue. Otherwise, they are not sorted.  
+The vector \code{gamma} determines the weight placed on the new data in updating each PC. For larger values of \code{gamma}, more weight is placed on \code{x} and less on \code{U}. A common choice is of the form \code{c/n}, with \code{n} the sample size and \code{c} a suitable positive constant. Argument \code{gamma} can be specified as a single positive number (common to all PCs) or as a vector of length \code{q}. \cr
+If \code{sort} is TRUE and \code{lambda} is not missing, the updated eigenpairs are sorted by decreasing eigenvalue. Otherwise, they are not sorted.} 
+
+\note{The Subspace Network Learning PCA can be implemented exactly or through a neural network. The latter is less accurate but much faster. Unlike the GHA and SGA algorithms, the SNL algorithm does not consistently estimate  principal components. It provides only the linear space spanned by the PCs.
 }
 
 \value{A list with components  
@@ -49,29 +49,17 @@ n <- 1e4  # sample size
 n0 <- 5e3 # initial sample size
 d <- 10   # number of variables
 q <- d # number of PC to compute
-X <- matrix(runif(n*d), n, d)
-X <- X * rep(sqrt(12 * (1:d)), each = n)
-# The eigenvalues of X are close to 1, 2, ..., d
+x <- matrix(runif(n*d), n, d)
+x <- x \%*\% diag(sqrt(12*(1:d)))
+# The eigenvalues of x are close to 1, 2, ..., d
 # and the corresponding eigenvectors are close to 
 # the canonical basis of R^d
 
 ## SNL PCA
-xbar <- colMeans(X[1:n0,])
-pca <- batchpca(cov(X[1:n0,]))
+xbar <- colMeans(x[1:n0,])
+pca <- batchpca(x[1:n0,], q, center=xbar, byrow=TRUE)
 for (i in (n0+1):n) {
-  xbar <- updateMean(xbar, X[i,], i-1)
-  pca <- snlpca(pca$values, pca$vectors, X[i,], 1/i, q, xbar)
+  xbar <- updateMean(xbar, x[i,], i-1)
+  pca <- snlpca(pca$values, pca$vectors, x[i,], 1/i, q, xbar)
 }
-pca
-# Corresponding projection matrix
-snlP <- tcrossprod(pca$vectors)
-
-# Compare to batch PCA 
-batch <- eigen(cov(X), TRUE)$vectors
-batchP <- tcrossprod(batch)
-
-# Relative distance between the two projectors (Frobenius norm)
-norm(snlP - batchP, "2") / norm(batchP, "2")
 }
-
-\keyword{multivariate}

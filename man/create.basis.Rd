@@ -15,16 +15,11 @@ create.basis(x, p, sp = 1e-09, degree = 3, nderiv = 2)
 }
 
 \arguments{
-  \item{x}{
-vector of observation times}
-  \item{p}{
-number of basis functions}
-  \item{sp}{
-smoothing parameter}
-  \item{degree}{
-degree of the B splines}
-  \item{nderiv}{
-order of the derivative to penalize for smoothing}
+  \item{x}{vector of observation times}
+  \item{p}{number of basis functions}
+  \item{sp}{smoothing parameter}
+  \item{degree}{degree of the B splines}
+  \item{nderiv}{order of the derivative to penalize for smoothing}
 }
 
 \details{
@@ -52,33 +47,23 @@ where \code{M} is the Gram matrix associated with \code{B}}
 \examples{
 n <- 100 # number of curves
 d <- 500 # number of observation points
-x <- (1:d)/d # observation points
+grid <- (1:d)/d # observation points
 p <- 50 # number of B-spline basis functions 
-par(mfrow = c(1,2))
 
 # Simulate Brownian motion
-brownian <- rnorm(n*d)/sqrt(d)
-dim(brownian) <- c(n,d)
-brownian <- t(apply(brownian,1,cumsum))
-matplot(x, t(brownian), type = "l", ylab = "y",
-	main="Sample paths of Brownian motion")
+x <- matrix(rnorm(n*d,sd=1/sqrt(d)),n,d)
+x <- t(apply(x,1,cumsum))
 
 # Create B-spline basis 
-mybasis <- create.basis(x, p, 1e-4)
+mybasis <- create.basis(grid, p, 1e-4)
 
 # Compute smooth basis coefficients 
-beta <- fd2coef(brownian, mybasis)
+beta <- fd2coef(x, mybasis)
 
 # Recover smooth functional data
-brownian.smooth <- coef2fd(beta, mybasis) 
-matplot(x, t(brownian.smooth), type = "l", ylab = "y",
-	main = "Smoothed sample paths")
-
+x.smooth <- coef2fd(beta, mybasis) 
+	
 # Standard PCA and Functional PCA
-pca <- prcomp(brownian)
+pca <- prcomp(x)
 fpca <- prcomp(beta)
-matplot(x, pca$rotation[,1:5], type = "l", ylab = "y", 
-	 main = "Standard PCA")
-matplot(x, coef2fd(fpca$rotation[,1:5], mybasis, FALSE), 
-	 type = "l", ylab = "y", main = "Functional PCA")
 }
