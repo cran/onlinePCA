@@ -1,6 +1,6 @@
 useDynLib(onlinePCA)
 
-importFrom(rARPACK, eigs_sym, svds)
+importFrom(RSpectra, eigs_sym, svds)
 importFrom(Rcpp, evalCpp)
 importFrom(splines, splineDesign)
 importFrom(stats, lsfit, quantile, runif, rnorm, uniroot)

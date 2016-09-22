@@ -14,7 +14,7 @@ Type: \tab Package\cr
 Version: \tab 1.2\cr
 Date: \tab 2015-10-29\cr
 License: \tab GPL-3\cr
-URL: \tab \url{http://cran.r-project.org/package=onlinePCA}\cr
+URL: \tab \url{https://cran.r-project.org/package=onlinePCA}\cr
 }
 }
 \author{

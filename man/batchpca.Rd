@@ -19,7 +19,7 @@ batchpca(x, q, center, type = c("data","covariance"), byrow = FALSE)
 }
 
 \details{
-The PCA is efficiently computed using the functions \code{\link[rARPACK]{svds}} or \code{\link[rARPACK]{eigs_sym}} of package \code{rARPACK}, depending on the argument \code{type}. An Implicitly Restarted Arnoldi Method (IRAM) is used in the former case and an Implicitly Restarted Lanczos Method (IRLM) in the latter.\cr
+The PCA is efficiently computed using the functions \code{\link[RSpectra]{svds}} or \code{\link[RSpectra]{eigs_sym}} of package \code{RSpectra}, depending on the argument \code{type}. An Implicitly Restarted Arnoldi Method (IRAM) is used in the former case and an Implicitly Restarted Lanczos Method (IRLM) in the latter.\cr
 The arguments \code{center} and \code{byrow} are only in effect if \code{type} is \code{"data"}. In this case a scaling factor \eqn{1/\sqrt{n}} (not \eqn{1/\sqrt{n-1}}) 
 is applied to \code{x} before computing its singular values and vectors, where \eqn{n} is the number of observation vectors stored in \code{x}.    
 }

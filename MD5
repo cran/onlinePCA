@@ -1,5 +1,5 @@
-d13c94138bc1277989185dfca6f10ee4 *DESCRIPTION
-13fafc697a85297d1478fa172f4caee2 *NAMESPACE
+c232807980b0a5ec6a672fc874b8ada9 *DESCRIPTION
+6052fc7634ac7881f73b4e1f14d8d007 *NAMESPACE
 e55b930ee7793bdd398349dbc2b58bdf *NEWS
 0af8be8bf494d299d2b50fe59867f176 *R/RcppExports.R
 fe2e9496bf74a5a14811d1cff5968904 *R/batchpca.R
@@ -20,7 +20,7 @@ d734c7bafc1f8ba9c2a67bb962517cab *R/onlinePCA-internal.R
 16ccceb017b80dcbc153cfd1b8c529a1 *R/snlpca.R
 163d7d38a117e485b9922229ee874097 *R/updateCovariance.R
 33b32e0cc767f81d0550454a8baff47b *R/updateMean.R
-8bb40448ed2c4b2fde95ef32d535e8e3 *man/batchpca.Rd
+b2bf8dc4b3c02a84b923e8a172b004ef *man/batchpca.Rd
 e3f0bd13be38f6d9877e54e44893cb6f *man/bsoipca.Rd
 6501f1f6833706f3c0ae39449aa445fa *man/ccipca.Rd
 a1283de56c1f1f457b4bc6f51049c421 *man/coef2fd.Rd
@@ -31,15 +31,15 @@ e5be42938ed8031f399a746e9b68ec2c *man/fd2coef.Rd
 24fc5c429833d81b7da11ffd7f671a5c *man/incRpca.Rd
 77dd9e3e31b8843db55522ee0cfd7880 *man/incRpca.block.Rd
 d6ca69a5f849820d8c1a019f5dc658eb *man/incRpca.rc.Rd
-d2467a4d28fee1af547cd8e60d12e629 *man/onlinePCA-package.Rd
+05b050b1705584c2546e183499df32bb *man/onlinePCA-package.Rd
 902cf75c5136f90315c6fb9730b034b2 *man/perturbationRpca.Rd
 fa7bfb6479103459a5844bd74ca6f510 *man/secularRpca.Rd
 1224d961d3cdc7a6843b5a626cad28a4 *man/sgapca.Rd
 c5d214f6d3bbdb61fd583fc74736f2b7 *man/snlpca.Rd
 685a0657c07192f6081f849cda7525c0 *man/updateCovariance.Rd
 adc97fbde4a73821c892ffbb3d4a7f57 *man/updateMean.Rd
-dcb4acf52a1092996bcf99156c164b7a *src/Makevars
-606d64fa561f1000382ce9d3113456ea *src/Makevars.win
+489b262d4f81136a32f0bb09936fe53e *src/Makevars
+a73031cbe7d6aaf0bd22e20f6526977d *src/Makevars.win
 d334919545f8c60aa8de9be10ac8649a *src/RcppExports.cpp
 47d3620f063deb3d762b874c2a530730 *src/ccipca.cpp
 752c47c6661c9afe86cffc0c6f071b9f *src/sga_ghapca.cpp
