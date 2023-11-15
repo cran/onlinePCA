@@ -7,16 +7,8 @@ Online Principal Component Analysis
 \description{
 Online PCA algorithms using perturbation methods (\code{\link{perturbationRpca}}), secular equations  (\code{\link{secularRpca}}), incremental PCA (\code{\link{incRpca}, \link{incRpca.block}, \link{incRpca.rc}}), and stochastic optimization (\code{\link{bsoipca}},\cr \code{\link{ccipca}, \link{ghapca}, \link{sgapca}, \link{snlpca}}). \code{\link{impute}} handles missing data with the regression approach of Brand (2002). \code{\link{batchpca}} performs fast batch (offline) PCA using iterative methods. \code{\link{create.basis}, \link{coef2fd}, \link{fd2coef}} respectively create B-spline basis sets for functional data (FD), convert FD to basis coefficients, and convert basis coefficients back to FD. \code{\link{updateMean}} and \code{\link{updateCovariance}} update the sample mean and sample covariance.}
 
-\details{
-\tabular{ll}{
-Package: \tab onlinePCA\cr
-Type: \tab Package\cr
-Version: \tab 1.2\cr
-Date: \tab 2015-10-29\cr
-License: \tab GPL-3\cr
-URL: \tab \url{https://cran.r-project.org/package=onlinePCA}\cr
-}
-}
+% \details{}
+
 \author{
 David Degras <ddegrasv@gmail.com>
 }

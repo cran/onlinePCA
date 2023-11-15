@@ -21,7 +21,7 @@ This function recursively updates the PCA with respect to a single new data vect
 
 \details{
 The forgetting factor \code{f} can be interpreted as the inverse of the number of observation vectors effectively used in the PCA: the "memory" of the PCA algorithm goes back \code{1/f} observations in the past. For larger values of \code{f}, the PCA update gives more relative weight to the new data \code{x} and less to the current PCA (\code{lambda,U}). For nonstationary processes, \code{f} should be closer to 1.\cr
-Only one of the arguments \code{n} and \code{f} needs being specified. If it is \code{n}, then \code{f} is set to {1/n} by default (usual PCA of sample covariance matrix where all data points have equal weight). If \code{f} is specified, its value overrides any eventual specification of \code{n}. 
+Only one of the arguments \code{n} and \code{f} needs being specified. If it is \code{n}, then \code{f} is set to \code{1/n} by default (usual PCA of sample covariance matrix where all data points have equal weight). If \code{f} is specified, its value overrides any eventual specification of \code{n}. 
  \cr
 If \code{sort} is TRUE, the updated eigenpairs are sorted by decreasing eigenvalue. Otherwise, they are not sorted.  
 }

@@ -25,7 +25,7 @@ incRpca(lambda, U, x, n, f = 1/n, q = length(lambda), center, tol = 1e-7)
 If the Euclidean distance between \code{x} and \code{U} is more than \code{tol}, the number of eigenpairs increases to \code{length(lambda)+1} before eventual truncation at order \code{q}. Otherwise, the eigenvectors remain unchanged and only the eigenvalues are updated.
 \cr  
 The forgetting factor \code{f} can be interpreted as the inverse of the number of observation vectors effectively used in the PCA: the "memory" of the PCA algorithm goes back \code{1/f} observations in the past. For larger values of \code{f}, the PCA update gives more relative weight to the new data \code{x} and less to the current PCA (\code{lambda,U}). For nonstationary processes, \code{f} should be closer to 1.\cr
-Only one of the arguments \code{n} and \code{f} needs being specified. If it is \code{n}, then \code{f} is set to {1/n} by default (usual PCA of sample covariance matrix where all data points have equal weight). If \code{f} is specified, its value overrides any eventual specification of \code{n}. 
+Only one of the arguments \code{n} and \code{f} needs being specified. If it is \code{n}, then \code{f} is set to \code{1/n} by default (usual PCA of sample covariance matrix where all data points have equal weight). If \code{f} is specified, its value overrides any eventual specification of \code{n}. 
 }
 
 \value{

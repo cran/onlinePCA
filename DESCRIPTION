@@ -1,8 +1,8 @@
 Package: onlinePCA
 Type: Package
 Title: Online Principal Component Analysis
-Version: 1.3.1
-Date: 2016-09-20
+Version: 1.3.2
+Date: 2023-11-15
 Author: David Degras [aut, cre], Herve Cardot [ctb]
 Maintainer: David Degras <ddegrasv@gmail.com>
 Description: Online PCA for multivariate and functional data using perturbation methods, low-rank incremental methods, and stochastic optimization methods. 
@@ -13,5 +13,5 @@ LinkingTo: Rcpp, RcppArmadillo
 URL: https://cran.r-project.org/package=onlinePCA
 Repository: CRAN
 NeedsCompilation: yes
-Packaged: 2016-09-21 23:21:33 UTC; David
-Date/Publication: 2016-09-22 02:27:05
+Packaged: 2023-11-15 01:07:14 UTC; daviddegras
+Date/Publication: 2023-11-15 04:50:02 UTC

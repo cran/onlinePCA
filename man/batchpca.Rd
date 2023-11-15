@@ -31,7 +31,7 @@ A list with components
 }
 
 \references{
-\url{http://www.caam.rice.edu/software/ARPACK/}
+\url{https://www.arpack.org}
 }
 
 \examples{
